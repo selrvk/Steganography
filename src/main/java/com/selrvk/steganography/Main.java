@@ -22,7 +22,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("main.fxml")));
+        Parent root = FXMLLoader.load(getClass().getResource("Main.fxml"));
         stage.setTitle("Steganography");
         stage.setScene(new Scene(root));
         stage.show();
