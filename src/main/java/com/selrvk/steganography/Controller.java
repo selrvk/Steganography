@@ -20,6 +20,8 @@ public class Controller {
     private ImageView imgView;
     @FXML
     private TextField inputField;
+    @FXML
+    private TextField outputField;
 
     private Scene scene;
     private Parent root;
@@ -118,28 +120,27 @@ public class Controller {
 
     public void decode(){
 
-        StringBuilder bin = new StringBuilder();
-
         try{
 
+            StringBuilder bin = new StringBuilder();
             BufferedImage img = ImageIO.read(getFile());
             int w = img.getWidth();
             int h = img.getHeight();
 
             outerLoop:
             for(int y = 0 ; y < h ; y++) {
-
                 for (int x = 0; x < w; x++) {
 
-                    if(bin.length() >= 48){
+                    if(bin.length() >= 64){
                         break outerLoop;
                     }
 
                     int pixel = img.getRGB(x, y);
-
                     int blue = pixel & 0xff;
-                    
+
                     bin.append(blue & 1);
+
+                    outputField.setText(convertToText(bin.toString()));
 
                 }
             }
@@ -149,8 +150,19 @@ public class Controller {
             e.printStackTrace();
 
         }
+    }
 
+    public String convertToText(String string){
 
+        StringBuilder data = new StringBuilder();
+        for(int i = 0 ; i < string.length() ; i += 8) {
+
+            String sByte =  string.substring(i, i + 8);
+            int cCode = Integer.parseInt(sByte, 2);
+            data.append((char) cCode);
+        }
+
+        return data.toString();
     }
 
     public void setFile(File file){
