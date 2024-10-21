@@ -10,6 +10,7 @@ module com.selrvk.steganography {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
+    requires java.desktop;
 
     opens com.selrvk.steganography to javafx.fxml;
     exports com.selrvk.steganography;
