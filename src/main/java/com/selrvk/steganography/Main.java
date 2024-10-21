@@ -7,24 +7,24 @@ import javafx.scene.ImageCursor;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import java.io.IOException;
+import javafx.scene.text.Text;
+import javafx.stage.StageStyle;
 
-public class HelloApplication extends Application {
+import java.io.IOException;
+import java.util.Objects;
+
+public class Main extends Application {
+
     @Override
     public void start(Stage stage) throws IOException {
 
-        Group root = new Group();
-        Scene scene = new Scene(root, Color.GRAY);
-
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("main.fxml")));
         stage.setTitle("Steganography");
-
-        Image icon = new Image("selrvklogo.png");
-        stage.getIcons().add(icon);
-        stage.setWidth(900);
-        stage.setHeight(900);
-        stage.setResizable(false);
-        stage.setScene(scene);
+        stage.setScene(new Scene(root));
         stage.show();
     }
 
