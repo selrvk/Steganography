@@ -2,7 +2,6 @@ package com.selrvk.steganography;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
@@ -27,11 +26,7 @@ public class Controller {
     @FXML
     private TextField outputField;
 
-    private Scene scene;
-    private Parent root;
-
     private BufferedImage img;
-    private BufferedImage newImg;
     private File file;
 
     public void uploadImg(ActionEvent event){
@@ -92,6 +87,7 @@ public class Controller {
 
                 try{
 
+
                     String bin = convertToBinary(inputField.getText());
                     int w = img.getWidth();
                     int h = img.getHeight();
@@ -106,7 +102,6 @@ public class Controller {
                             }
 
                             int pixel = img.getRGB(x, y);
-                            int alpha = (pixel >> 24) & 0xff;
                             int red = (pixel >> 16) & 0xff;
                             int green = (pixel >> 8) & 0xff;
                             int blue = pixel & 0xff;
@@ -130,7 +125,7 @@ public class Controller {
 
             }
 
-        } else if (inputField.getText().length() < 8){
+        } else if (inputField.getText().length() < 8 && !inputField.getText().isEmpty()){
 
             Alert error = new Alert(Alert.AlertType.INFORMATION);
             error.setTitle("Error");
@@ -139,7 +134,17 @@ public class Controller {
 
             error.showAndWait();
 
-        } else {
+        } else if (img == null){
+
+            Alert error = new Alert(Alert.AlertType.INFORMATION);
+            error.setTitle("Error");
+            error.setHeaderText(null);
+            error.setContentText("Please upload an image!");
+
+            error.showAndWait();
+
+
+        }else {
 
             Alert error = new Alert(Alert.AlertType.INFORMATION);
             error.setTitle("Error");
@@ -151,8 +156,9 @@ public class Controller {
     }
 
     public String convertToBinary(String string){
-        
+
         StringBuilder bin = new StringBuilder();
+
         for(char c : string.toCharArray()){
 
             bin.append(String.format("%8s", Integer.toBinaryString(c)).replaceAll(" ", "0"));
@@ -179,34 +185,46 @@ public class Controller {
 
     public void decode(){
 
-        try{
 
-            StringBuilder bin = new StringBuilder();
-            int w = img.getWidth();
-            int h = img.getHeight();
+        if(img != null){
 
-            outerLoop:
-            for(int y = 0 ; y < h ; y++) {
-                for (int x = 0; x < w; x++) {
+            try{
 
-                    if(bin.length() >= 256){
-                        break outerLoop;
+                StringBuilder bin = new StringBuilder();
+                int w = img.getWidth();
+                int h = img.getHeight();
+
+                outerLoop:
+                for(int y = 0 ; y < h ; y++) {
+                    for (int x = 0; x < w; x++) {
+
+                        if(bin.length() >= 256){
+                            break outerLoop;
+                        }
+
+                        int pixel = img.getRGB(x, y);
+                        int blue = pixel & 0xff;
+
+                        bin.append((blue & 1) == 0 ? '0' : '1');
+
                     }
-
-                    int pixel = img.getRGB(x, y);
-                    int blue = pixel & 0xff;
-
-                    bin.append((blue & 1) == 0 ? '0' : '1');
-
                 }
+
+                outputField.setText(convertToText(bin.toString()));
+
+            } catch (Exception e){
+
+                e.printStackTrace();
+
             }
+        } else {
 
-            outputField.setText(convertToText(bin.toString()));
+            Alert error = new Alert(Alert.AlertType.INFORMATION);
+            error.setTitle("Error");
+            error.setHeaderText(null);
+            error.setContentText("Please upload an image!");
 
-        } catch (Exception e){
-
-            e.printStackTrace();
-
+            error.showAndWait();
         }
     }
 
@@ -217,7 +235,15 @@ public class Controller {
 
             String sByte =  string.substring(i, i + 8);
             int cCode = Integer.parseInt(sByte, 2);
-            data.append((char) cCode);
+
+            if(cCode >= 32 && cCode <= 126){
+
+                data.append((char) cCode);
+
+            } else {
+
+                break;
+            }
         }
 
         return data.toString();
@@ -237,7 +263,7 @@ public class Controller {
     public void setImage(BufferedImage img){
 
         this.img = img;
-    }
+    }   
 
     public BufferedImage getImage(){
 
