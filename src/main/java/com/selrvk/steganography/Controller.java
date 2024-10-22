@@ -3,9 +3,12 @@ package com.selrvk.steganography;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.scene.*;
 import javafx.stage.FileChooser;
@@ -14,6 +17,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 public class Controller {
     @FXML
@@ -36,8 +40,9 @@ public class Controller {
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("JPEG files (*.jpg)", "*.jpg"),
-                new FileChooser.ExtensionFilter("PNG files (*.png)", "*.png")
+
+                new FileChooser.ExtensionFilter("PNG files (*.png)", "*.png"),
+                new FileChooser.ExtensionFilter("JPEG files (*.jpg)", "*.jpg")
         );
 
         File chosenFile = fileChooser.showOpenDialog(stage);
@@ -66,48 +71,87 @@ public class Controller {
 
         int binIndex = 0;
 
-        try{
+        if(inputField.getText().length() >= 8 && img != null){
 
-            String bin = convertToBinary(inputField.getText());
-            int w = img.getWidth();
-            int h = img.getHeight();
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Set File Name");
+            alert.setHeaderText("Enter file name: ");
 
-            System.out.println("bin string : " + bin);
+            TextField fileNameInput = new TextField();
+            fileNameInput.setPromptText(" ");
 
-            outerLoop:
-            for(int y = 0 ; y < h ; y++) {
+            GridPane gridPane = new GridPane();
+            gridPane.add(fileNameInput, 1, 1);
 
-                for (int x = 0; x < w; x++) {
+            alert.getDialogPane().setContent(gridPane);
+            Optional<ButtonType> result = alert.showAndWait();
 
-                    if(binIndex >= bin.length()){
-                        break outerLoop;
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+
+                String fileName = fileNameInput.getText();
+
+                try{
+
+                    String bin = convertToBinary(inputField.getText());
+                    int w = img.getWidth();
+                    int h = img.getHeight();
+
+                    outerLoop:
+                    for(int y = 0 ; y < h ; y++) {
+
+                        for (int x = 0; x < w; x++) {
+
+                            if(binIndex >= bin.length()){
+                                break outerLoop;
+                            }
+
+                            int pixel = img.getRGB(x, y);
+                            int alpha = (pixel >> 24) & 0xff;
+                            int red = (pixel >> 16) & 0xff;
+                            int green = (pixel >> 8) & 0xff;
+                            int blue = pixel & 0xff;
+
+                            blue = (blue & 0xFE) | (bin.charAt(binIndex) - '0');
+                            binIndex++;
+
+                            int newPixel = (0xff << 24) | (red<<16) | (green << 8) | blue;
+                            img.setRGB(x,y,newPixel);
+                        }
                     }
 
-                    int pixel = img.getRGB(x, y);
-                    int alpha = (pixel >> 24) & 0xff;
-                    int red = (pixel >> 16) & 0xff;
-                    int green = (pixel >> 8) & 0xff;
-                    int blue = pixel & 0xff;
+                    exportImage(img, fileName);
+                    inputField.setText(" ");
 
-                    blue = (blue & 0xFE) | (bin.charAt(binIndex) - '0');
-                    binIndex++;
+                } catch (Exception e){
 
-                    int newPixel = (0xff << 24) | (red<<16) | (green << 8) | blue;
-                    img.setRGB(x,y,newPixel);
+                    e.printStackTrace();
+
                 }
+
             }
 
-        } catch (Exception e){
+        } else if (inputField.getText().length() < 8){
 
-            e.printStackTrace();
+            Alert error = new Alert(Alert.AlertType.INFORMATION);
+            error.setTitle("Error");
+            error.setHeaderText(null);
+            error.setContentText("Password too short!");
 
+            error.showAndWait();
+
+        } else {
+
+            Alert error = new Alert(Alert.AlertType.INFORMATION);
+            error.setTitle("Error");
+            error.setHeaderText(null);
+            error.setContentText("Empty field!");
+
+            error.showAndWait();
         }
-
-        exportImage(img);
     }
 
     public String convertToBinary(String string){
-
+        
         StringBuilder bin = new StringBuilder();
         for(char c : string.toCharArray()){
 
@@ -117,13 +161,14 @@ public class Controller {
         return bin.toString();
     }
 
-    public void exportImage(BufferedImage image){
+    public void exportImage(BufferedImage image, String fileName){
+
+        String path = System.getProperty("user.home") + "/Desktop/" + fileName + ".png";
 
         try {
 
-            File exportLoc = new File("src/testuwu.png");
+            File exportLoc = new File(path);
             ImageIO.write(image, "png", exportLoc);
-            System.out.println("Exported");
 
         } catch (IOException e) {
 
@@ -144,7 +189,7 @@ public class Controller {
             for(int y = 0 ; y < h ; y++) {
                 for (int x = 0; x < w; x++) {
 
-                    if(bin.length() >= 64){
+                    if(bin.length() >= 256){
                         break outerLoop;
                     }
 
@@ -156,7 +201,6 @@ public class Controller {
                 }
             }
 
-            System.out.println("length : " + bin.toString());
             outputField.setText(convertToText(bin.toString()));
 
         } catch (Exception e){
@@ -176,7 +220,6 @@ public class Controller {
             data.append((char) cCode);
         }
 
-        System.out.println("data : " + data.toString());
         return data.toString();
     }
 
