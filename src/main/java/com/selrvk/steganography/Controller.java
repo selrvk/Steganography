@@ -26,6 +26,8 @@ public class Controller {
     private Scene scene;
     private Parent root;
 
+    private BufferedImage img;
+    private BufferedImage newImg;
     private File file;
 
     public void uploadImg(ActionEvent event){
@@ -39,12 +41,23 @@ public class Controller {
         );
 
         File chosenFile = fileChooser.showOpenDialog(stage);
-        setFile(chosenFile);
 
         if(chosenFile != null){
 
-            Image myImage = new Image(chosenFile.toURI().toString());
-            imgView.setImage(myImage);
+            try {
+
+                Image myImage = new Image(chosenFile.toURI().toString());
+                imgView.setImage(myImage);
+                setFile(chosenFile);
+
+                BufferedImage img = ImageIO.read(getFile());
+                setImage(img);
+
+            } catch (Exception e){
+
+                e.printStackTrace();
+
+            }
         }
 
     }
@@ -56,9 +69,10 @@ public class Controller {
         try{
 
             String bin = convertToBinary(inputField.getText());
-            BufferedImage img = ImageIO.read(getFile());
             int w = img.getWidth();
             int h = img.getHeight();
+
+            System.out.println("bin string : " + bin);
 
             outerLoop:
             for(int y = 0 ; y < h ; y++) {
@@ -80,8 +94,6 @@ public class Controller {
 
                     int newPixel = (0xff << 24) | (red<<16) | (green << 8) | blue;
                     img.setRGB(x,y,newPixel);
-
-                    exportImage(img);
                 }
             }
 
@@ -90,6 +102,8 @@ public class Controller {
             e.printStackTrace();
 
         }
+
+        exportImage(img);
     }
 
     public String convertToBinary(String string){
@@ -109,13 +123,13 @@ public class Controller {
 
             File exportLoc = new File("src/testuwu.png");
             ImageIO.write(image, "png", exportLoc);
+            System.out.println("Exported");
 
         } catch (IOException e) {
 
             e.printStackTrace();
 
         }
-
     }
 
     public void decode(){
@@ -123,7 +137,6 @@ public class Controller {
         try{
 
             StringBuilder bin = new StringBuilder();
-            BufferedImage img = ImageIO.read(getFile());
             int w = img.getWidth();
             int h = img.getHeight();
 
@@ -138,8 +151,8 @@ public class Controller {
                     int pixel = img.getRGB(x, y);
                     int blue = pixel & 0xff;
 
-                    bin.append(blue & 1);
-
+                    bin.append((blue & 1) == 0 ? '0' : '1');
+                    System.out.println("Length: " + bin.toString().length());
                     outputField.setText(convertToText(bin.toString()));
 
                 }
@@ -174,6 +187,16 @@ public class Controller {
     public File getFile(){
 
         return this.file;
+    }
+
+    public void setImage(BufferedImage img){
+
+        this.img = img;
+    }
+
+    public BufferedImage getImage(){
+
+        return this.img;
     }
 
 }
