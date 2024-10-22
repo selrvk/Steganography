@@ -34,6 +34,6 @@
             <Font name="Dubai Bold" size="15.0" />
          </font>
       </Label>
-      <TextField editable="false" layoutX="34.0" layoutY="402.0" prefHeight="50.0" prefWidth="290.0" />
+      <TextField fx:id="outputField" editable="false" layoutX="34.0" layoutY="402.0" prefHeight="50.0" prefWidth="290.0" />
    </children>
 </AnchorPane>

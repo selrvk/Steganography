@@ -152,11 +152,12 @@ public class Controller {
                     int blue = pixel & 0xff;
 
                     bin.append((blue & 1) == 0 ? '0' : '1');
-                    System.out.println("Length: " + bin.toString().length());
-                    outputField.setText(convertToText(bin.toString()));
 
                 }
             }
+
+            System.out.println("length : " + bin.toString());
+            outputField.setText(convertToText(bin.toString()));
 
         } catch (Exception e){
 
@@ -175,6 +176,7 @@ public class Controller {
             data.append((char) cCode);
         }
 
+        System.out.println("data : " + data.toString());
         return data.toString();
     }
 
