@@ -31,7 +31,7 @@
             <Font name="Segoe UI Black" size="25.0" />
          </font>
       </Button>
-      <ImageView fx:id="imgView" fitHeight="500.0" fitWidth="500.0" layoutX="350.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView  fx:id="imgView" fitHeight="500.0" fitWidth="500.0" layoutX="350.0" pickOnBounds="true" preserveRatio="true" />
       <TextField fx:id="inputField" layoutX="34.0" layoutY="183.0" prefHeight="50.0" prefWidth="290.0" />
       <TextField fx:id="outputField" editable="false" layoutX="34.0" layoutY="402.0" prefHeight="50.0" prefWidth="290.0" />
       <Label layoutX="34.0" layoutY="155.0" prefHeight="22.0" prefWidth="138.0" text="Enter text to encode">

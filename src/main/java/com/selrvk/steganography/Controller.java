@@ -26,8 +26,22 @@ public class Controller {
     @FXML
     private TextField outputField;
 
+    private final int maxInputLength = 50;
     private BufferedImage img;
     private File file;
+
+    public void initialize(){
+
+            inputField.textProperty().addListener((observable, oldValue, newValue) -> {
+
+                if(newValue.length() > maxInputLength){
+
+                    inputField.setText(oldValue);
+                    printError("Too long");
+                }
+            });
+
+    }
 
     public void uploadImg(ActionEvent event){
 
@@ -36,8 +50,7 @@ public class Controller {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
 
-                new FileChooser.ExtensionFilter("PNG files (*.png)", "*.png"),
-                new FileChooser.ExtensionFilter("JPEG files (*.jpg)", "*.jpg")
+                new FileChooser.ExtensionFilter("Image Files (*.png, *.jpg)", "*.png", "*.jpg")
         );
 
         File chosenFile = fileChooser.showOpenDialog(stage);
@@ -87,14 +100,12 @@ public class Controller {
 
                 try{
 
-
                     String bin = convertToBinary(inputField.getText());
                     int w = img.getWidth();
                     int h = img.getHeight();
 
                     outerLoop:
                     for(int y = 0 ; y < h ; y++) {
-
                         for (int x = 0; x < w; x++) {
 
                             if(binIndex >= bin.length()){
@@ -120,38 +131,19 @@ public class Controller {
                 } catch (Exception e){
 
                     e.printStackTrace();
-
                 }
-
             }
-
         } else if (inputField.getText().length() < 8 && !inputField.getText().isEmpty()){
 
-            Alert error = new Alert(Alert.AlertType.INFORMATION);
-            error.setTitle("Error");
-            error.setHeaderText(null);
-            error.setContentText("Password too short!");
-
-            error.showAndWait();
+            printError("Too short");
 
         } else if (img == null){
 
-            Alert error = new Alert(Alert.AlertType.INFORMATION);
-            error.setTitle("Error");
-            error.setHeaderText(null);
-            error.setContentText("Please upload an image!");
+            printError("No image");
 
-            error.showAndWait();
+        } else {
 
-
-        }else {
-
-            Alert error = new Alert(Alert.AlertType.INFORMATION);
-            error.setTitle("Error");
-            error.setHeaderText(null);
-            error.setContentText("Empty field!");
-
-            error.showAndWait();
+            printError("Empty field");
         }
     }
 
@@ -179,12 +171,10 @@ public class Controller {
         } catch (IOException e) {
 
             e.printStackTrace();
-
         }
     }
 
     public void decode(){
-
 
         if(img != null){
 
@@ -198,7 +188,7 @@ public class Controller {
                 for(int y = 0 ; y < h ; y++) {
                     for (int x = 0; x < w; x++) {
 
-                        if(bin.length() >= 256){
+                        if(bin.length() >= 400){
                             break outerLoop;
                         }
 
@@ -206,7 +196,6 @@ public class Controller {
                         int blue = pixel & 0xff;
 
                         bin.append((blue & 1) == 0 ? '0' : '1');
-
                     }
                 }
 
@@ -215,16 +204,10 @@ public class Controller {
             } catch (Exception e){
 
                 e.printStackTrace();
-
             }
         } else {
 
-            Alert error = new Alert(Alert.AlertType.INFORMATION);
-            error.setTitle("Error");
-            error.setHeaderText(null);
-            error.setContentText("Please upload an image!");
-
-            error.showAndWait();
+            printError("No image");
         }
     }
 
@@ -249,10 +232,45 @@ public class Controller {
         return data.toString();
     }
 
+    public void printError(String sError){
+
+        if(sError.equals("Too long")){
+
+            Alert error = new Alert(Alert.AlertType.INFORMATION);
+            error.setTitle("Error");
+            error.setHeaderText(null);
+            error.setContentText("Input too long!");
+            error.showAndWait();
+
+        } else if(sError.equals("Too short")){
+
+            Alert error = new Alert(Alert.AlertType.INFORMATION);
+            error.setTitle("Error");
+            error.setHeaderText(null);
+            error.setContentText("Input too short!");
+            error.showAndWait();
+
+        } else if(sError.equals("Empty field")){
+
+            Alert error = new Alert(Alert.AlertType.INFORMATION);
+            error.setTitle("Error");
+            error.setHeaderText(null);
+            error.setContentText("Empty field!");
+            error.showAndWait();
+
+        } else if(sError.equals("No image")){
+
+            Alert error = new Alert(Alert.AlertType.INFORMATION);
+            error.setTitle("Error");
+            error.setHeaderText(null);
+            error.setContentText("Please upload an image!");
+            error.showAndWait();
+        }
+    }
+
     public void setFile(File file){
 
         this.file = file;
-
     }
 
     public File getFile(){
